@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Conheça a proposta do ATLEVIUM: gestão esportiva para organizações, atletas e competições. Produto em planejamento pela Nevuma Tech.">
+  <meta name="color-scheme" content="light dark">
+  <title>ATLEVIUM — Apresentação da plataforma esportiva</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.mjs"></script>
+</head>
+<body>
+<a class="skip" href="#conteudo">Pular para o conteúdo</a>
+<header class="header">
+  <a class="brand" href="#conteudo" aria-label="ATLEVIUM, início">ATLEVIUM</a>
+  <nav aria-label="Seções da apresentação">
+    <a href="#plataforma">Plataforma</a><a href="#experimente">Experimente</a><a href="#mvp">MVP</a><a href="#proximos-passos">Próximos passos</a>
+  </nav>
+  <div class="tools"><button id="theme" class="quiet" type="button" aria-pressed="false">Tema escuro</button><button id="present" class="outline small" type="button" aria-pressed="false">Modo apresentação</button></div>
+</header>
+<main id="conteudo">
+  <section class="hero slide" aria-labelledby="hero-title">
+    <div class="hero-copy">
+      <h1 id="hero-title">O esporte organizado.<br><span>Da inscrição ao pódio.</span></h1>
+      <p class="lead">Organizações, atletas e competições em uma experiência conectada. Uma plataforma planejada para Web, Android e iOS.</p>
+      <p class="status">Em planejamento · Prévia conceitual</p>
+      <div class="actions"><a class="button" href="#plataforma">Explorar a proposta <span aria-hidden="true">→</span></a><a class="outline" href="#mvp">Ver o MVP</a></div>
+      <p class="note">Conheça a visão do produto. Os exemplos desta página são ilustrativos e não representam um sistema já disponível.</p>
+    </div>
+    <figure class="product-preview" aria-label="Conceito ilustrativo de painel e aplicativo, sem conexão com o produto">
+      <div class="laptop"><div class="laptop-screen">
+        <div class="preview-top"><strong>ATLEVIUM</strong><span>Conceito</span></div>
+        <div class="preview-body"><aside aria-hidden="true"><span class="active">Competição</span><span>Equipes</span><span>Calendário</span><span>Classificação</span></aside>
+          <div class="preview-main"><h2>Copa Municipal</h2><div class="preview-tabs"><span>Visão geral</span><span>Equipes</span><span>Calendário</span></div>
+            <div class="preview-row"><span class="preview-icon" aria-hidden="true">01</span><div><strong>Equipes</strong><small>Inscrições e participantes</small></div></div>
+            <div class="preview-row"><span class="preview-icon" aria-hidden="true">02</span><div><strong>Calendário</strong><small>Jogos, locais e horários</small></div></div>
+            <div class="preview-row"><span class="preview-icon" aria-hidden="true">03</span><div><strong>Classificação</strong><small>Resultados da competição</small></div></div>
+          </div>
+        </div>
+      </div><div class="laptop-base"></div></div>
+      <div class="phone" aria-hidden="true"><div class="notch"></div><strong>ATLEVIUM</strong><hr><h3>Copa Municipal</h3><p>Seu esporte.<br>Seus próximos jogos.</p><div class="phone-row">Equipes <span>›</span></div><div class="phone-row">Calendário <span>›</span></div><div class="phone-row">Classificação <span>›</span></div><div class="phone-bottom">Início · Competições · Perfil</div></div>
+      <figcaption>Conceito de interface · Não é uma captura do produto</figcaption>
+    </figure>
+  </section>
+
+  <section id="plataforma" class="section slide" aria-labelledby="platform-title">
+    <div class="section-heading"><h2 id="platform-title">Uma plataforma.<br><span>Diferentes responsabilidades.</span></h2><p>Do esporte municipal à rotina de clubes e ligas, uma proposta para organizar a operação e aproximar as pessoas.</p></div>
+    <div class="columns roles">
+      <article><span class="number">01</span><h3>Organizações</h3><p>Prefeituras, clubes, academias, federações e ligas com seus próprios cadastros, equipes e competições.</p></article>
+      <article><span class="number">02</span><h3>Gestores</h3><p>Inscrições, calendários e resultados em uma jornada guiada, com responsabilidades e decisões rastreáveis.</p></article>
+      <article><span class="number">03</span><h3>Atletas e público</h3><p>Informações de jogos e classificações em um portal de consulta, com exposição de dados pessoais controlada.</p></article>
+    </div>
+    <ol class="journey"><li><span>01</span><h3>Configure</h3><p>Defina competição, categorias e regras.</p></li><li><span>02</span><h3>Inscreva</h3><p>Organize equipes e confira participantes.</p></li><li><span>03</span><h3>Organize</h3><p>Gere confrontos e programe as partidas.</p></li><li><span>04</span><h3>Publique</h3><p>Compartilhe resultados e classificação.</p></li></ol>
+  </section>
+
+  <section id="experimente" class="section tinted slide" aria-labelledby="demo-title">
+    <div class="section-heading"><h2 id="demo-title">Um resultado muda o jogo.<br><span>E a classificação também.</span></h2><p>Experimente uma ideia da jornada: registre o placar de uma partida e veja a tabela ser recalculada.</p></div>
+    <div class="demo-label"><strong>Simulação local · Futsal · Dados fictícios</strong><button class="quiet" id="reset" type="button">Reiniciar exemplo</button></div>
+    <div class="demo">
+      <form id="score-form" class="score-panel">
+        <p class="mini-label">COPA EXEMPLO · RODADA 1</p><h3>Pronto para o apito final?</h3>
+        <p>Informe o resultado de Aurora × Horizonte. Você pode corrigir o placar e confirmar novamente.</p>
+        <div class="score-fields"><label for="home-score">Aurora<input id="home-score" name="homeScore" type="number" min="0" max="99" step="1" value="2" required inputmode="numeric"></label><span aria-hidden="true">×</span><label for="away-score">Horizonte<input id="away-score" name="awayScore" type="number" min="0" max="99" step="1" value="1" required inputmode="numeric"></label></div>
+        <button type="submit" class="button">Confirmar resultado</button><p id="feedback" class="feedback" role="status" aria-live="polite">Partida pendente. A tabela considera apenas resultados confirmados.</p>
+      </form>
+      <div class="standings-panel"><div class="table-heading"><h3>Classificação</h3><span id="demo-state">Antes da partida</span></div>
+        <div class="table-scroll" tabindex="0" role="region" aria-label="Tabela de classificação do exemplo"><table><caption>Equipes fictícias · Grupo único</caption><thead><tr><th scope="col">Equipe</th><th scope="col"><abbr title="Pontos">PTS</abbr></th><th scope="col"><abbr title="Jogos">J</abbr></th><th scope="col"><abbr title="Vitórias">V</abbr></th><th scope="col"><abbr title="Saldo de gols">SG</abbr></th></tr></thead><tbody id="standings"><tr><th scope="row">Aurora</th><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><th scope="row">Horizonte</th><td>0</td><td>0</td><td>0</td><td>0</td></tr></tbody></table></div>
+        <p class="note">Exemplo: vitória vale 3 pontos e empate vale 1. Ordem: pontos, vitórias, saldo e gols marcados. Empate total é sinalizado; a ordem visual alfabética não decide a competição.</p>
+      </div>
+    </div>
+    <p class="note demo-disclaimer">Esta interação demonstra apenas o conceito. Não salva dados, não autentica usuários e não se conecta a uma API. A classificação oficial será calculada e validada no backend do produto.</p>
+    <noscript><p>Ative JavaScript para experimentar a simulação. Todo o conteúdo da proposta continua disponível para leitura.</p></noscript>
+  </section>
+
+  <section id="mvp" class="section slide" aria-labelledby="mvp-title">
+    <div class="section-heading"><h2 id="mvp-title">Começar pelo essencial.<br><span>Entregar a jornada completa.</span></h2><p>O primeiro MVP será focado em organizar uma competição de ponta a ponta, com regras claras e segurança entre organizações.</p></div>
+    <div class="scope-columns"><article><p class="mini-label">PRIMEIRO MVP · PLANEJADO</p><h3>Da organização ao resultado</h3><ul class="check-list"><li>Autenticação, organizações e permissões</li><li>Atletas, equipes, modalidades e categorias</li><li>Inscrições básicas com aprovação</li><li>Campeonatos, confrontos e calendário</li><li>Resultados e classificação automática</li><li>Portal público e dashboard administrativo</li></ul><p class="note">Primeiro motor esportivo proposto: futsal. Formatos previstos: pontos corridos, eliminatória simples e grupos com eliminatórias.</p></article><article class="later"><p class="mini-label">EVOLUÇÃO · APÓS O MVP</p><h3>Crescer com o uso real</h3><ul class="plain-list"><li>Gestão financeira e cobrança recorrente</li><li>Planos SaaS e integrações de pagamento</li><li>Upload e análise de documentos</li><li>Notificações push e comunicados avançados</li><li>Novos motores esportivos e relatórios</li></ul><p class="note">Escopo, custos e disponibilidade serão definidos em etapas. Não há preços ou prazos comerciais confirmados.</p></article></div>
+    <div class="trust"><h3>Cada organização, com o seu espaço.</h3><p>O planejamento prevê isolamento validado no backend, permissões por organização e publicação apenas dos dados autorizados. Segurança e privacidade serão requisitos de homologação do MVP.</p></div>
+  </section>
+
+  <section id="proximos-passos" class="section tinted slide" aria-labelledby="roadmap-title">
+    <div class="section-heading"><h2 id="roadmap-title">Da primeira competição<br><span>à evolução contínua.</span></h2><p>Um plano em etapas para entregar valor de forma consistente, com base nas necessidades do esporte brasileiro.</p></div>
+    <ol class="roadmap"><li><span class="step">01</span><h3>Planejamento</h3><p>Validar necessidades, regras, escopo e experiência. Etapa atual.</p></li><li><span class="step">02</span><h3>Fundação segura</h3><p>Construir identidade, organizações e cadastros com testes de isolamento.</p></li><li><span class="step">03</span><h3>Competição completa</h3><p>Conectar inscrições, confrontos, resultados e consulta pública.</p></li><li><span class="step">04</span><h3>Piloto validado</h3><p>Testar com uma organização, validar plataformas e ajustar antes de expandir.</p></li></ol>
+    <div class="next-action"><h3>Vamos validar o próximo passo.</h3><p>Confira o escopo do MVP e alinhe as necessidades da primeira organização piloto.</p><a class="button" href="#mvp">Revisar o escopo do MVP <span aria-hidden="true">→</span></a></div>
+  </section>
+
+  <section id="duvidas" class="section slide faq" aria-labelledby="faq-title"><div class="section-heading"><h2 id="faq-title">Clareza antes de começar.</h2><p>O que esta apresentação mostra e o que ainda será construído.</p></div>
+    <details><summary>O ATLEVIUM já está disponível para uso?</summary><p>Não. O projeto está em planejamento. Esta apresentação e a simulação local ajudam a validar a proposta; aplicativo, API e banco ainda não foram implementados.</p></details>
+    <details><summary>Posso usar no computador e no celular?</summary><p>A apresentação é responsiva. O produto está planejado em Flutter para Web, Android e iOS, mas os aplicativos ainda dependem de implementação e homologação em cada plataforma.</p></details>
+    <details><summary>A simulação registra uma partida real?</summary><p>Não. São duas equipes fictícias em memória no navegador. Confirmar ou corrigir o resultado altera apenas o exemplo; recarregar a página ou reiniciar remove o resultado.</p></details>
+    <details><summary>Quais modalidades serão atendidas?</summary><p>A arquitetura considera diferentes modalidades, com futsal por equipes como primeiro motor proposto. Cada novo esporte precisa de regras e testes próprios antes de ser anunciado como disponível.</p></details>
+    <details><summary>Já haverá cobranças e assinaturas?</summary><p>Esses recursos estão previstos para depois do MVP. Provedores, preços, condições e integração de pagamentos ainda não foram definidos.</p></details>
+  </section>
+</main>
+<footer><a class="brand" href="#conteudo">ATLEVIUM</a><p>Desenvolvido pela Nevuma Tech</p><span>Prévia conceitual · Revisada em 24/10/2026</span></footer>
+<div id="presentation-controls" class="presentation-controls" hidden aria-label="Controles de apresentação"><button id="previous" type="button" class="outline small">Anterior</button><span id="slide-count" aria-live="polite">1 / 7</span><button id="next" type="button" class="button small">Próximo</button><button id="exit" type="button" class="quiet">Sair <kbd>Esc</kbd></button></div>
+</body>
+</html>
