@@ -63,10 +63,32 @@ export const demoSports = [
 ];
 
 export function createAppDemo() {
-  return { role: 'atleta', view: 'inicio', sport: 'futsal', registration: 'disponivel', attendance: false, reservation: null, readNotices: false, result: null };
+  return { role: 'atleta', view: 'inicio', sport: 'futsal', registration: 'disponivel', attendance: false, reservation: null, readNotices: false, result: null, teamTab: 'elenco', history: [], privacy: { profile: 'inherit', surname: 'inherit', age: 'inherit', image: 'inherit' } };
 }
 
-const demoViews = ['inicio', 'agenda', 'explorar', 'perfil', 'competicoes', 'inscricoes', 'elenco', 'chamada', 'reservas', 'notificacoes', 'servicos'];
+const demoViews = ['inicio', 'agenda', 'explorar', 'perfil', 'competicoes', 'inscricoes', 'elenco', 'chamada', 'reservas', 'notificacoes', 'servicos', 'privacidade', 'seguranca'];
+
+export const organizationPrivacy = Object.freeze({ profile: false, surname: false, age: false, image: false });
+
+export function effectivePrivacy(preferences) {
+  return Object.fromEntries(Object.keys(organizationPrivacy).map(key => [key, preferences[key] === 'inherit' ? organizationPrivacy[key] : preferences[key] === 'show']));
+}
+
+export function ageAtCutoff(birthDate, cutoffDate) {
+  function parse(value) {
+    if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) throw new Error('Data inválida.');
+    const date = new Date(`${value}T00:00:00Z`);
+    if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== value) throw new Error('Data inválida.');
+    return date;
+  }
+  const birth = parse(birthDate), cutoff = parse(cutoffDate);
+  if (birth > cutoff) throw new Error('Nascimento posterior à data de corte.');
+  return cutoff.getUTCFullYear() - birth.getUTCFullYear() - Number(cutoff.getUTCMonth() < birth.getUTCMonth() || (cutoff.getUTCMonth() === birth.getUTCMonth() && cutoff.getUTCDate() < birth.getUTCDate()));
+}
+
+function recordHistory(state, patch, message) {
+  return { ...state, ...patch, history: [...state.history, { sequence: state.history.length + 1, message }] };
+}
 
 export function transitionApp(state, action) {
   switch (action.type) {
@@ -81,18 +103,26 @@ export function transitionApp(state, action) {
     case 'sport':
       if (!demoSports.some(sport => sport.id === action.value)) throw new Error('Modalidade inválida.');
       return { ...state, sport: action.value };
+    case 'teamTab':
+      if (state.role === 'atleta') throw new Error('Use Técnico ou Gestor para consultar a área da equipe.');
+      if (!['visao', 'elenco', 'documentos', 'historico'].includes(action.value)) throw new Error('Aba inválida.');
+      return { ...state, teamTab: action.value };
+    case 'privacy':
+      if (state.role !== 'atleta') throw new Error('Use o perfil Atleta para simular a própria privacidade.');
+      if (!Object.hasOwn(organizationPrivacy, action.field) || !['inherit', 'show', 'hide'].includes(action.value)) throw new Error('Preferência inválida.');
+      return { ...state, privacy: { ...state.privacy, [action.field]: action.value } };
     case 'register':
       if (state.role !== 'atleta') throw new Error('Use o perfil Atleta para solicitar a inscrição.');
       if (state.registration !== 'disponivel') throw new Error('Já existe uma solicitação neste exemplo.');
-      return { ...state, registration: 'pendente' };
+      return recordHistory(state, { registration: 'pendente' }, 'Atleta solicitou matrícula na Escola de Futsal.');
     case 'approve':
       if (state.role !== 'gestor') throw new Error('A aprovação é demonstrada no perfil Gestor.');
       if (state.registration !== 'pendente') throw new Error('Não há inscrição pendente para aprovar.');
-      return { ...state, registration: 'aprovada' };
+      return recordHistory(state, { registration: 'aprovada' }, 'Gestor aprovou a matrícula de Ana.');
     case 'attendance':
       if (state.role === 'atleta') throw new Error('A chamada exige Técnico ou Gestor neste exemplo.');
       if (state.registration !== 'aprovada') throw new Error('A inscrição de Ana precisa estar aprovada antes da chamada.');
-      return { ...state, attendance: !state.attendance };
+      return recordHistory(state, { attendance: !state.attendance }, state.attendance ? 'Técnico/gestor desmarcou a presença de Ana.' : 'Técnico/gestor registrou a presença de Ana.');
     case 'reserve':
       if (state.role !== 'atleta') throw new Error('Use o perfil Atleta para reservar neste exemplo.');
       if (!['18h00', '19h00', '20h00'].includes(action.value)) throw new Error('Horário inválido.');

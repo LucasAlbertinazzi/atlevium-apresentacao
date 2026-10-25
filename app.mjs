@@ -1,4 +1,4 @@
-import { calculateStandings, emptyStandings, clampSlide, ecosystem, demoSports, createAppDemo, transitionApp } from './model.mjs';
+import { calculateStandings, emptyStandings, clampSlide, ecosystem, demoSports, createAppDemo, transitionApp, effectivePrivacy, organizationPrivacy, ageAtCutoff } from './model.mjs';
 
 const $ = selector => document.querySelector(selector);
 const theme = $('#theme');
@@ -115,7 +115,7 @@ slides.forEach(slide => observer.observe(slide));
 // Dados digitados pelo visitante nunca são interpolados como HTML.
 let appState = createAppDemo();
 const roleNames = { atleta: 'Atleta', tecnico: 'Técnico', gestor: 'Gestor' };
-const viewNames = { inicio: 'Seu próximo movimento', agenda: 'Agenda esportiva', explorar: 'Explore seu esporte', perfil: 'Minha identidade', competicoes: 'Competições', inscricoes: 'Inscrições e matrículas', elenco: 'Equipe e elenco', chamada: 'Chamada da turma', reservas: 'Reserve seu espaço', notificacoes: 'Central de avisos', servicos: 'Serviços do ecossistema' };
+const viewNames = { inicio: 'Seu próximo movimento', agenda: 'Agenda esportiva', explorar: 'Explore seu esporte', perfil: 'Minha identidade', competicoes: 'Competições', inscricoes: 'Inscrições e matrículas', elenco: 'Área da equipe', chamada: 'Chamada da turma', reservas: 'Reserve seu espaço', notificacoes: 'Central de avisos', servicos: 'Serviços do ecossistema', privacidade: 'Minha privacidade', seguranca: 'Segurança da conta' };
 const registrationNames = { disponivel: 'Inscrições abertas', pendente: 'Aguardando aprovação', aprovada: 'Matrícula aprovada' };
 
 function viewButton(view, text, detail = '') {
@@ -135,7 +135,7 @@ function registrationCard() {
   const action = registration === 'disponivel' && role === 'atleta' ? actionButton('register', 'Solicitar matrícula')
     : registration === 'pendente' && role === 'gestor' ? actionButton('approve', 'Aprovar matrícula de Ana') : '';
   const guidance = registration === 'disponivel' ? 'Ana pode solicitar uma vaga no perfil Atleta.' : registration === 'pendente' ? 'Troque para Gestor para conferir e aprovar a solicitação.' : 'Ana já aparece na chamada. Troque para Técnico para registrar a presença.';
-  return `<div class="app-card"><span class="app-tag">${registrationNames[registration]}</span><h4>Escola de Futsal</h4><p>Turma adulta · Terças e quintas · 18h00</p><div class="app-person"><span class="app-avatar">AN</span><div><strong>Ana Nunes</strong><small>Participante fictícia</small></div></div><p>${guidance}</p>${action}${registration === 'aprovada' ? `<p class="app-inline-state">${appState.attendance ? 'Presença de Ana registrada pelo técnico.' : 'Matrícula confirmada. Presença ainda não registrada.'}</p>` : ''}</div>`;
+  return `<div class="app-card"><span class="app-tag">${registrationNames[registration]}</span><h4>Escola de Futsal</h4><p>Turma adulta · Terças e quintas · 18h00</p><details class="app-service"><summary>Critério de idade e data de corte</summary><p>18 a 59 anos em 31/12/2026. Considera-se a idade nessa data, não a idade no dia da inscrição. Ana tem ${ageAtCutoff('2000-05-03', '2026-12-31')} anos no corte e atende ao critério deste exemplo.</p><small>Data de corte explícita · Dados fictícios</small></details><div class="app-person"><span class="app-avatar">AN</span><div><strong>Ana Nunes</strong><small>Participante fictícia</small></div></div><p>${guidance}</p>${action}${registration === 'aprovada' ? `<p class="app-inline-state">${appState.attendance ? 'Presença de Ana registrada pelo técnico.' : 'Matrícula confirmada. Presença ainda não registrada.'}</p>` : ''}</div>`;
 }
 
 function matchCard() {
@@ -148,7 +148,7 @@ function homeView() {
   const task = appState.role === 'atleta' ? viewButton('inscricoes', 'Minha matrícula', registrationNames[appState.registration])
     : appState.role === 'gestor' ? viewButton('inscricoes', 'Conferir inscrições', appState.registration === 'pendente' ? 'Ana aguarda sua aprovação' : 'Nenhuma solicitação pendente')
       : viewButton('chamada', 'Fazer chamada', appState.registration === 'aprovada' ? 'Ana está na lista da turma' : 'A matrícula de Ana ainda não foi aprovada');
-  return `<p class="app-greeting">${greeting}</p><h3 tabindex="-1" id="app-view-title">Seu próximo movimento</h3>${matchCard()}<h4 class="app-subtitle">Sua rotina, sem atalhos difíceis</h4>${task}${viewButton('reservas', 'Quadras e horários', 'Consulte a agenda de espaços')}${viewButton('perfil', 'Carteirinha e vínculo', 'Sua identificação esportiva')}`;
+  return `<p class="app-greeting">${greeting}</p><h3 tabindex="-1" id="app-view-title">Seu próximo movimento</h3>${matchCard()}<h4 class="app-subtitle">Sua rotina, sem atalhos difíceis</h4>${appState.role !== 'atleta' ? viewButton('elenco', 'Gerenciar Equipe Aurora', 'Acesso direto: elenco, documentos e histórico') : ''}${task}${viewButton('reservas', 'Quadras e horários', 'Consulte disponibilidade e impedimentos')}${viewButton('perfil', 'Carteirinha e vínculo', 'Sua identificação esportiva')}`;
 }
 
 function agendaView() {
@@ -173,16 +173,39 @@ function attendanceView() {
 }
 
 function rosterView() {
-  return `<div class="app-card"><span class="app-tag">Futsal · Adulto feminino</span><h4>Equipe Aurora</h4><p>Participantes fictícias. Ana entra no elenco ativo após a aprovação da matrícula.</p></div>${[['LP', 'Lia Prado', 'Goleira · Vínculo ativo'], ['BC', 'Bia Costa', 'Ala · Vínculo ativo'], ['AN', 'Ana Nunes', registrationNames[appState.registration]]].map(([initials, name, status]) => `<div class="app-attendance-row"><span class="app-avatar">${initials}</span><div><strong>${name}</strong><small>${status}</small></div></div>`).join('')}${viewButton('inscricoes', 'Ver matrícula de Ana', 'Conferência e aprovação')}${viewButton('chamada', 'Abrir chamada da turma', appState.attendance ? 'Presença de Ana registrada' : 'Acompanhar frequência')}`;
+  const tabs = [['visao', 'Visão geral'], ['elenco', 'Elenco'], ['documentos', 'Documentos'], ['historico', 'Histórico']];
+  const header = `<div class="app-card"><span class="app-tag">Futsal · Adulto feminino</span><h4>Equipe Aurora</h4><p>Elenco, documentos e decisões no mesmo contexto.</p></div><div class="app-team-tabs" role="group" aria-label="Seções da equipe">${tabs.map(([id, label]) => `<button type="button" data-team-tab="${id}" aria-pressed="${appState.teamTab === id}">${label}</button>`).join('')}</div>`;
+  const content = {
+    visao: `<h4 class="app-subtitle">Próximas ações</h4><p>${appState.registration === 'pendente' ? 'Ana aguarda aprovação do gestor.' : appState.registration === 'aprovada' ? 'Ana está aprovada. Confira a frequência da turma.' : 'Ana ainda não solicitou matrícula.'}</p>${viewButton('inscricoes', 'Conferir matrícula', registrationNames[appState.registration])}${viewButton('chamada', 'Fazer chamada', 'Acesso direto à turma')}`,
+    elenco: `${[['LP', 'Lia Prado', 'Goleira · Vínculo ativo'], ['BC', 'Bia Costa', 'Ala · Vínculo ativo'], ['AN', 'Ana Nunes', registrationNames[appState.registration]]].map(([initials, name, status]) => `<div class="app-attendance-row"><span class="app-avatar">${initials}</span><div><strong>${name}</strong><small>${status}</small></div></div>`).join('')}${viewButton('inscricoes', 'Ver matrícula de Ana', 'Conferência e aprovação')}${viewButton('chamada', 'Abrir chamada da turma', appState.attendance ? 'Presença de Ana registrada' : 'Acompanhar frequência')}`,
+    documentos: `<div class="app-empty"><h4>Nenhum documento emitido</h4><p>No produto, esta área reunirá ficha coletiva e credenciais. Esta prévia não emite documentos válidos.</p></div><details class="app-service"><summary>Ver requisitos de documentação</summary><p>Vínculos aprovados, autorização do responsável quando aplicável e acesso restrito. Documentos exigidos serão definidos por finalidade e regulamento.</p></details>`,
+    historico: appState.history.length ? `<ol class="app-history">${appState.history.map(item => `<li><strong>Etapa ${item.sequence}</strong><p>${item.message}</p></li>`).join('')}</ol>` : `<div class="app-empty"><h4>A jornada ainda não começou</h4><p>Solicite a matrícula como Atleta, aprove como Gestor e registre presença como Técnico. As etapas aparecerão aqui.</p></div>`,
+  };
+  return header + content[appState.teamTab] + '<p class="app-footnote">Exemplo local. Histórico não equivale a uma auditoria do servidor.</p>';
 }
 
 function reservationsView() {
-  return `<div class="app-card"><span class="app-tag">28 de outubro · Exemplo</span><h4>Quadra do Parque</h4><p>Quadra poliesportiva · Consulte os horários abaixo.</p></div><h4 class="app-subtitle">Escolha seu horário</h4><div class="app-slots">${['18h00', '19h00', '20h00'].map(time => `<button type="button" data-demo-action="reserve" data-value="${time}"${appState.reservation === time ? ' aria-pressed="true"' : ' aria-pressed="false"'}><strong>${time}</strong><small>${time === '19h00' ? 'Ocupado · treino' : appState.reservation === time ? 'Sua reserva' : 'Disponível'}</small></button>`).join('')}</div>${appState.reservation ? `<p class="app-inline-state">Reserva confirmada: 28 out, ${appState.reservation}. Confira também na Agenda.</p>${actionButton('cancelReservation', 'Cancelar minha reserva', '', true)}` : `<p class="app-footnote">No perfil Atleta, tente 19h00 para ver o conflito. Depois escolha um horário disponível.</p>`}<p class="app-footnote">Reservas são fictícias. Nenhum espaço real está sendo reservado.</p>`;
+  return `<div class="app-card"><span class="app-tag">28 de outubro · Reservas abertas</span><h4>Quadra do Parque</h4><p>19h00 indisponível: treino programado. ${appState.reservation ? `Sua reserva: ${appState.reservation}.` : '18h00 e 20h00 disponíveis.'}</p></div><h4 class="app-subtitle">Disponibilidade antes de confirmar</h4><div class="app-slots">${['18h00', '19h00', '20h00'].map(time => `<button type="button" data-demo-action="reserve" data-value="${time}"${time === '19h00' || appState.role !== 'atleta' || appState.reservation ? ' disabled' : ''} aria-pressed="${appState.reservation === time}"><strong>${time}</strong><small>${time === '19h00' ? 'Indisponível · treino' : appState.reservation === time ? 'Sua reserva' : appState.reservation ? 'Cancele para trocar' : 'Disponível'}</small></button>`).join('')}</div>${appState.reservation ? `<p class="app-inline-state">Reserva confirmada: 28 out, ${appState.reservation}. Confira também na Agenda.</p>${appState.role === 'atleta' ? actionButton('cancelReservation', 'Cancelar minha reserva', '', true) : ''}` : `<p class="app-footnote">${appState.role === 'atleta' ? 'Escolha diretamente um horário disponível.' : 'Consulta de ocupação. Para reservar no exemplo, use Atleta.'}</p>`}<div class="app-card app-closed-resource"><span class="app-tag">Reservas encerradas</span><h4>Campo da Colina</h4><p>Período encerrado em 23/10. Próxima abertura do exemplo: 30/10 às 09h00. A restrição aparece antes de qualquer solicitação.</p></div><p class="app-footnote">Datas e espaços fictícios. Nenhum local real está sendo reservado.</p>`;
 }
 
 function profileView() {
   const isAthlete = appState.role === 'atleta';
-  return `<div class="app-identity"><span class="app-avatar large">${isAthlete ? 'AN' : appState.role === 'tecnico' ? 'TC' : 'GT'}</span><span>IDENTIDADE ESPORTIVA · EXEMPLO</span><h4>${isAthlete ? 'Ana Nunes' : roleNames[appState.role]}</h4><p>Instituto Aurora<br>${roleNames[appState.role]} · Futsal</p><div class="app-card-id">AT-DEMO-001</div><small>Identificador ilustrativo · Sem validade documental</small></div><h4 class="app-subtitle">Seu vínculo</h4><p class="app-inline-state">${isAthlete ? registrationNames[appState.registration] : 'Perfil de demonstração selecionado'}</p>${viewButton('notificacoes', 'Avisos da organização', appState.readNotices ? 'Avisos lidos nesta prévia' : 'Confira seus próximos passos')}<p class="app-footnote">Desenvolvido pela Nevuma Tech</p>`;
+  return `<div class="app-identity"><span class="app-avatar large">${isAthlete ? 'AN' : appState.role === 'tecnico' ? 'TC' : 'GT'}</span><span>IDENTIDADE ESPORTIVA · EXEMPLO</span><h4>${isAthlete ? 'Ana Nunes' : roleNames[appState.role]}</h4><p>Instituto Aurora<br>${roleNames[appState.role]} · Futsal</p><div class="app-card-id">AT-DEMO-001</div><small>Identificador ilustrativo · Sem validade documental</small></div><h4 class="app-subtitle">Seu vínculo</h4><p class="app-inline-state">${isAthlete ? registrationNames[appState.registration] : 'Perfil de demonstração selecionado'}</p>${isAthlete ? viewButton('privacidade', 'Minha privacidade', 'Veja o efeito real de cada preferência no exemplo') : ''}${viewButton('seguranca', 'Segurança da conta', 'Proteções previstas para o produto')}${viewButton('notificacoes', 'Avisos da organização', appState.readNotices ? 'Avisos lidos nesta prévia' : 'Confira seus próximos passos')}<p class="app-footnote">Desenvolvido pela Nevuma Tech</p>`;
+}
+
+function privacyView() {
+  const effective = effectivePrivacy(appState.privacy);
+  const fields = [['profile', 'Perfil público'], ['surname', 'Sobrenome'], ['age', 'Idade'], ['image', 'Imagem de perfil']];
+  return `<p class="app-footnote">Ajustes apenas nesta prévia, sem conta real. A preferência herdada mostra seu efeito final.</p>${fields.map(([key, label]) => `<div class="app-privacy-field"><label for="privacy-${key}">${label}</label><select id="privacy-${key}" data-privacy-field="${key}"${appState.role !== 'atleta' ? ' disabled' : ''}>${[['inherit', 'Herdar da organização'], ['show', 'Mostrar'], ['hide', 'Ocultar']].map(([value, text]) => `<option value="${value}"${appState.privacy[key] === value ? ' selected' : ''}>${text}</option>`).join('')}</select><small>${appState.privacy[key] === 'inherit' ? `Herdado da organização: ${organizationPrivacy[key] ? 'visível' : 'oculto'}` : `Escolha pessoal: ${effective[key] ? 'visível' : 'oculto'}`}</small></div>`).join('')}<div class="app-public-preview"><h4>O que o público veria</h4>${effective.profile ? `<p>${effective.image ? 'Imagem: avatar ilustrativo AN.' : 'Imagem oculta.'}</p><strong>${effective.surname ? 'Ana Nunes' : 'Ana N.'}</strong><p>${effective.age ? '26 anos · Dado fictício' : 'Idade oculta.'}</p>` : '<p>Perfil não publicado. Mesmo campos marcados como visíveis ficam fora do portal enquanto o perfil estiver oculto.</p>'}</div><p class="app-footnote">No produto, menores, finalidade e políticas da organização terão validações adicionais no servidor.</p>`;
+}
+
+function securityView() {
+  return `<span class="app-tag">Requisito do produto · Planejado</span><p>Esta prévia não tem autenticação. Nenhuma proteção abaixo pode ser ativada por aqui.</p>${[
+    ['Autenticação em duas etapas', 'Segundo fator, recuperação segura e confirmação para ações sensíveis.'],
+    ['Sessões e histórico', 'Reconhecer dispositivos, consultar acessos e revogar sessões com confirmação.'],
+    ['Acesso por organização', 'O servidor valida vínculo e permissão em cada operação; trocar perfil aqui é só uma simulação.'],
+    ['Continuidade em campo', 'Consulta offline planejada. Escrita offline só após validar conflitos, revogação e reconciliação.'],
+  ].map(([title, text]) => `<details class="app-service"><summary>${title}</summary><p>${text}</p></details>`).join('')}`;
 }
 
 function noticesView() {
@@ -203,7 +226,7 @@ function exploreView() {
   return `${sportPicker()}${viewButton('competicoes', 'Jogos e campeonatos', 'Modalidades, resultados e classificações')}${viewButton('inscricoes', 'Turmas e inscrições', 'Matrículas e acompanhamento')}${viewButton('reservas', 'Locais e reservas', 'Escolha um horário sem conflito')}${appState.role !== 'atleta' ? viewButton('elenco', 'Equipe e elenco', 'Vínculos e situação das atletas') + viewButton('chamada', 'Turmas e chamada', 'Frequência e participantes') : ''}${viewButton('servicos', 'Outros serviços', 'Incentivos, financeiro e operação')}${viewButton('notificacoes', 'Notícias e avisos', 'Comunicação da organização')}`;
 }
 
-const appRenderers = { inicio: homeView, agenda: agendaView, competicoes: competitionsView, inscricoes: registrationCard, elenco: rosterView, chamada: attendanceView, reservas: reservationsView, perfil: profileView, notificacoes: noticesView, servicos: servicesView, explorar: exploreView };
+const appRenderers = { inicio: homeView, agenda: agendaView, competicoes: competitionsView, inscricoes: registrationCard, elenco: rosterView, chamada: attendanceView, reservas: reservationsView, perfil: profileView, notificacoes: noticesView, servicos: servicesView, explorar: exploreView, privacidade: privacyView, seguranca: securityView };
 
 function renderApp() {
   const content = $('#app-content');
@@ -248,6 +271,10 @@ function dispatchApp(action, focus = false) {
 $('#app-demo').addEventListener('click', event => {
   const button = event.target.closest('button');
   if (!button) return;
+  if (button.dataset.teamTab) {
+    dispatchApp({ type: 'teamTab', value: button.dataset.teamTab });
+    $('#app-content').querySelector(`[data-team-tab="${appState.teamTab}"]`)?.focus({ preventScroll: true });
+  }
   if (button.dataset.view) dispatchApp({ type: 'view', value: button.dataset.view }, true);
   if (button.dataset.demoAction) {
     const actionName = button.dataset.demoAction;
@@ -256,6 +283,11 @@ $('#app-demo').addEventListener('click', event => {
   }
 });
 $('#app-demo').addEventListener('change', event => {
+  if (event.target.dataset.privacyField) {
+    const field = event.target.dataset.privacyField;
+    dispatchApp({ type: 'privacy', field, value: event.target.value });
+    $(`#privacy-${field}`)?.focus({ preventScroll: true });
+  }
   if (event.target.id === 'app-sport') {
     dispatchApp({ type: 'sport', value: event.target.value });
     $('#app-sport')?.focus({ preventScroll: true });
@@ -292,3 +324,14 @@ document.querySelector('.module-rail').addEventListener('click', event => {
 });
 renderModule('competicoes');
 renderApp();
+
+document.querySelector('.improvement-strip').addEventListener('click', event => {
+  const button = event.target.closest('[data-preview-improvement]');
+  if (!button) return;
+  const routes = { team: ['tecnico', 'elenco'], reservation: ['atleta', 'reservas'], privacy: ['atleta', 'privacidade'] };
+  const [role, view] = routes[button.dataset.previewImprovement];
+  dispatchApp({ type: 'role', value: role });
+  dispatchApp({ type: 'view', value: view });
+  $('#app').scrollIntoView({ block: 'start' });
+  $('#app-view-title')?.focus({ preventScroll: true });
+});
