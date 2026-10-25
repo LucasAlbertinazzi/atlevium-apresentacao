@@ -1,4 +1,4 @@
-import { calculateStandings, emptyStandings, clampSlide, ecosystem, demoSports, createAppDemo, transitionApp, effectivePrivacy, organizationPrivacy, ageAtCutoff } from './model.mjs';
+import { calculateStandings, emptyStandings, clampSlide, ecosystem, demoSports, createAppDemo, transitionApp, effectivePrivacy, organizationPrivacy, ageAtCutoff } from './model.mjs?v=134b456e4a6d';
 
 const $ = selector => document.querySelector(selector);
 const theme = $('#theme');
